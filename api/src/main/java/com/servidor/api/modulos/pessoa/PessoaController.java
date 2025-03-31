@@ -1,0 +1,106 @@
+package com.servidor.api.modulos.pessoa;
+
+import com.servidor.api.modulos.fotopessoa.FotoPessoa;
+import com.servidor.api.modulos.minio.MinioService;
+import io.minio.ObjectWriteResponse;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/pessoa")
+public class PessoaController {
+
+  @Autowired
+  private PessoaRepository pessoaRepository;
+
+  @Autowired
+  private MinioService minioService;
+
+  @Autowired
+  private PessoaMapper pessoaMapper;
+
+  @Transactional
+  @PostMapping
+  public ResponseEntity<Pessoa> createPessoa(@RequestBody PessoaDTO pessoaDTO, @RequestParam("fotos") MultipartFile[] fotos) {
+    try {
+      Pessoa pessoa = pessoaMapper.toEntity(pessoaDTO);
+      pessoa.setFotos(new ArrayList<>());
+      for (MultipartFile foto : fotos) {
+        if (!foto.isEmpty()) {
+          String hash = UUID.randomUUID().toString();
+          byte[] bytes = foto.getBytes();
+          ObjectWriteResponse minioResponse = minioService.uploadFile(bytes, hash);
+          FotoPessoa fotoPessoa = new FotoPessoa();
+          fotoPessoa.setPessoa(pessoa);
+          fotoPessoa.setData(LocalDate.now());
+          fotoPessoa.setBucket(minioResponse.bucket());
+          fotoPessoa.setHash(hash);
+          pessoa.getFotos().add(fotoPessoa);
+        }
+      }
+      Pessoa savedPessoa = pessoaRepository.save(pessoa);
+      return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
+    } catch (Exception e) {
+      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @GetMapping
+  public ResponseEntity<Page<Pessoa>> getAllPessoas(Pageable pageable) {
+    try {
+      Page<Pessoa> pagePessoas = pessoaRepository.findAll(pageable);
+
+      if (pagePessoas.isEmpty()) {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      }
+      return new ResponseEntity<>(pagePessoas, HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<Pessoa> getPessoaById(@PathVariable("id") Long id) {
+    Optional<Pessoa> pessoaData = pessoaRepository.findById(id);
+
+    return pessoaData.map(pessoa -> new ResponseEntity<>(pessoa, HttpStatus.OK))
+            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+  }
+
+  @Transactional
+  @PutMapping("/{id}")
+  public ResponseEntity<Pessoa> updatePessoa(@PathVariable("id") Long id, @RequestBody PessoaDTO pessoa) {
+    Optional<Pessoa> pessoaData = pessoaRepository.findById(id);
+
+    if (pessoaData.isPresent()) {
+      Pessoa existingPessoa = pessoaData.get();
+      pessoaMapper.toEntity(existingPessoa, pessoa);
+
+      return new ResponseEntity<>(pessoaRepository.save(existingPessoa), HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  @Transactional
+  @DeleteMapping("/{id}")
+  public ResponseEntity<HttpStatus> deletePessoa(@PathVariable("id") Long id) {
+    try {
+      pessoaRepository.deleteById(id);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+}

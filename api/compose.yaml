@@ -1,9 +1,44 @@
 services:
+#  seplag-api:
+#    image: seplag-api:latest
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/seplag
+#      - SPRING_DATASOURCE_USERNAME=admin
+#      - SPRING_DATASOURCE_PASSWORD=admin
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+#    depends_on:
+#      - postgres
   postgres:
     image: 'postgres:latest'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_DB=seplag'
+      - 'POSTGRES_PASSWORD=admin'
+      - 'POSTGRES_USER=admin'
     ports:
-      - '5432'
+      - '5433:5432'
+  minio:
+    image: minio/minio:latest
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - minionetwork
+    volumes:
+      - 'minio_data:/data'
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin
+      - MINIO_DEFAULT_BUCKETS=foto_pessoa
+
+networks:
+  minionetwork:
+    driver: bridge
+
+volumes:
+  minio_data:
+    driver: local
