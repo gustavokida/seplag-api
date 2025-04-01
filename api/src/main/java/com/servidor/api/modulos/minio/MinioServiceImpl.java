@@ -20,18 +20,28 @@ public class MinioServiceImpl implements MinioService {
   private String bucketName;
 
   @PostConstruct
-  public void init() {
-    try {
-      boolean bucketExists = minioClient.bucketExists(
-              BucketExistsArgs.builder().bucket(bucketName).build()
-      );
-      if (!bucketExists) {
-        minioClient.makeBucket(
-                MakeBucketArgs.builder().bucket(bucketName).build()
-        );
+  public void initialize() {
+    int maxRetries = 10;
+    int delaySeconds = 5;
+    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+        if (!exists) {
+          minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+        }
+        System.out.println("MinIO initialized successfully on attempt " + attempt);
+        return;
+      } catch (Exception e) {
+        if (attempt == maxRetries) {
+          throw new RuntimeException("Failed to initialize MinIO after " + maxRetries + " attempts", e);
+        }
+        System.out.println("MinIO not ready, retrying in " + delaySeconds + " seconds... (Attempt " + attempt + ")");
+        try {
+          Thread.sleep(delaySeconds * 1000);
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+        }
       }
-    } catch (Exception e) {
-      throw new RuntimeException("Falha ao iniciar minio bucket", e);
     }
   }
 

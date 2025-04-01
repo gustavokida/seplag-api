@@ -30,7 +30,7 @@ public class UnidadeController {
   @GetMapping("{id}/servidores-efetivos-lotados")
   public ResponseEntity<?> getServidoresEfetivosLotados(@PathVariable("id") Long id) {
     try {
-      List<ServidorEfetivo> servidorEfetivo = servidorEfetivoRepository.findByUnidadeId(id);
+      List<ServidorEfetivo> servidorEfetivo = servidorEfetivoRepository.findByPessoa_Lotacoes_Unidade_Id(id);
       if (servidorEfetivo.isEmpty()) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       }

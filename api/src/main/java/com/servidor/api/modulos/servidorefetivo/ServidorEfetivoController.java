@@ -21,13 +21,11 @@ public class ServidorEfetivoController {
 
 
   @GetMapping("buscar-endereco-funcional")
-  public ResponseEntity<?> buscarEnderecoFuncional(ServidorEfetivoSpec spec, Pageable pageable) {
+  public ResponseEntity<?> buscarEnderecoFuncional(@RequestParam String nomeParcial) {
     try {
-      Optional<ServidorEfetivo> servidorEfetivo = servidorEfetivoRepository.findAll(spec, pageable)
-              .stream()
-              .findFirst();
-      if (servidorEfetivo.isPresent()) {
-        Endereco endereco = servidorEfetivo.get().getPessoa().getPessoaEnderecos().getFirst().getEndereco();
+      ServidorEfetivo servidorEfetivo = servidorEfetivoRepository.findByPessoa_NomeLike(nomeParcial);
+      if (servidorEfetivo != null) {
+        Endereco endereco = servidorEfetivo.getPessoa().getPessoaEnderecos().getFirst().getEndereco();
         return new ResponseEntity<>(endereco, HttpStatus.OK);
       } else {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

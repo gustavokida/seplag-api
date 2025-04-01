@@ -42,8 +42,6 @@ dependencies {
 	implementation "io.minio:minio:8.5.17"
 	implementation 'org.mapstruct:mapstruct:1.5.2.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.2.Final'
-	implementation 'net.kaczmarzyk:specification-arg-resolver:2.18.1'
-	implementation("th.co.geniustree.springdata.jpa:specification-with-projections:2.0.0")
 }
 
 tasks.named('test') {

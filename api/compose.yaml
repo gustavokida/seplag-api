@@ -1,21 +1,4 @@
 services:
-#  seplag-api:
-#    image: seplag-api:latest
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/seplag
-#      - SPRING_DATASOURCE_USERNAME=admin
-#      - SPRING_DATASOURCE_PASSWORD=admin
-#      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-#      - MINIO_URL=http://minio:9000
-#    depends_on:
-#      - postgres
-#       - minio:
-#          condition: service_healthy
   postgres:
     image: 'postgres:latest'
     environment:
@@ -24,6 +7,8 @@ services:
       - 'POSTGRES_USER=admin'
     ports:
       - '5433:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
   minio:
     image: quay.io/minio/minio:latest
     ports:
@@ -40,6 +25,42 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  seplag-api:
+    image: seplag-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+#      - SPRING_SERVLET_MULTIPART_ENABLED=true
+#      - SPRING_SERVLET_MULTIPART_MAX-FILE-SIZE=10MB
+#      - SPRING_SERVLET_MULTIPART_MAX-REQUEST-SIZE=20MB
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/seplag
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - MINIO_URL=http://minio:9000
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+#      - MINIO_BUCKET-NAME=foto-pessoa
+#      - APP_JWTSECRET=chave-secreta
+#      - APP_JWTEXPIRATIONINMS=300000
+#      - APP_JWTREFRESHEXPIRATIONINMS=600000
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 volumes:
   minio-data:
+  db-data:
 
