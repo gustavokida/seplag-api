@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,28 +33,31 @@ public class PessoaController {
   private PessoaMapper pessoaMapper;
 
   @Transactional
-  @PostMapping
-  public ResponseEntity<Pessoa> createPessoa(@RequestBody PessoaDTO pessoaDTO, @RequestParam("fotos") MultipartFile[] fotos) {
+  @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+  public ResponseEntity<?> createPessoa(@ModelAttribute PessoaDTO pessoaDTO) {
     try {
       Pessoa pessoa = pessoaMapper.toEntity(pessoaDTO);
+      List<FotoPessoa> fotos = new ArrayList<>();
       pessoa.setFotos(new ArrayList<>());
-      for (MultipartFile foto : fotos) {
-        if (!foto.isEmpty()) {
-          String hash = UUID.randomUUID().toString();
-          byte[] bytes = foto.getBytes();
-          ObjectWriteResponse minioResponse = minioService.uploadFile(bytes, hash);
-          FotoPessoa fotoPessoa = new FotoPessoa();
-          fotoPessoa.setPessoa(pessoa);
-          fotoPessoa.setData(LocalDate.now());
-          fotoPessoa.setBucket(minioResponse.bucket());
-          fotoPessoa.setHash(hash);
-          pessoa.getFotos().add(fotoPessoa);
+      if(pessoaDTO.getFotos() != null){
+        for (MultipartFile foto : pessoaDTO.getFotos()) {
+          if (!foto.isEmpty()) {
+            String hash = UUID.randomUUID().toString();
+            ObjectWriteResponse minioResponse = minioService.uploadFile(foto, hash);
+            FotoPessoa fotoPessoa = new FotoPessoa();
+            fotoPessoa.setPessoa(pessoa);
+            fotoPessoa.setData(LocalDate.now());
+            fotoPessoa.setBucket(minioResponse.bucket());
+            fotoPessoa.setHash(hash);
+            fotos.add(fotoPessoa);
+          }
         }
+        pessoa.setFotos(fotos);
       }
       Pessoa savedPessoa = pessoaRepository.save(pessoa);
       return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
     } catch (Exception e) {
-      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

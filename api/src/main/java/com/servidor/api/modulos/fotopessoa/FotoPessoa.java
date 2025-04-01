@@ -1,5 +1,6 @@
 package com.servidor.api.modulos.fotopessoa;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.servidor.api.modulos.pessoa.Pessoa;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class FotoPessoa {
   @Column(name = "fp_id")
   private Integer id;
 
+  @JsonBackReference
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "pes_id", foreignKey = @ForeignKey(name = "fk_foto_pessoa_pessoa"))
   private Pessoa pessoa;

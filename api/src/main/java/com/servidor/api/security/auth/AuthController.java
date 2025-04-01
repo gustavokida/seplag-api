@@ -6,6 +6,7 @@ import com.servidor.api.security.auth.entity.RefreshTokenRequest;
 import com.servidor.api.security.auth.jwt.JwtUtil;
 import com.servidor.api.security.auth.entity.RefreshToken;
 import com.servidor.api.security.auth.jwt.RefreshTokenService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +35,7 @@ public class AuthController {
     this.refreshTokenService = refreshTokenService;
   }
 
+  @Transactional
   @PostMapping("/login")
   public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) {
     try {
@@ -51,6 +53,7 @@ public class AuthController {
     return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken.getToken()));
   }
 
+  @Transactional
   @PostMapping("/refresh")
   public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshRequest) {
     String refreshToken = refreshRequest.getRefreshToken();

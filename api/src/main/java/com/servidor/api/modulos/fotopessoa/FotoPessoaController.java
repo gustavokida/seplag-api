@@ -1,10 +1,12 @@
 package com.servidor.api.modulos.fotopessoa;
 
 import com.servidor.api.modulos.minio.MinioService;
+import com.servidor.api.modulos.minio.MinioServiceImpl;
 import com.servidor.api.modulos.pessoa.Pessoa;
 import com.servidor.api.modulos.pessoa.PessoaRepository;
 import io.minio.ObjectWriteResponse;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/foto-pessoa")
+@RequiredArgsConstructor
 public class FotoPessoaController {
 
   @Autowired
@@ -30,7 +33,7 @@ public class FotoPessoaController {
   private PessoaRepository pessoaRepository;
 
   @Autowired
-  private MinioService minioService;
+  private final MinioService minioService;
 
   @GetMapping
   public ResponseEntity<Page<FotoPessoa>> getAllFotoPessoas(Pageable pageable) {
@@ -92,8 +95,7 @@ public class FotoPessoaController {
       for (MultipartFile foto : fotos) {
         if (!foto.isEmpty()) {
           String hash = UUID.randomUUID().toString();
-          byte[] bytes = foto.getBytes();
-          ObjectWriteResponse minioResponse = minioService.uploadFile(bytes, hash);
+          ObjectWriteResponse minioResponse = minioService.uploadFile(foto, hash);
           FotoPessoa fotoPessoa = new FotoPessoa();
           fotoPessoa.setPessoa(pessoa);
           fotoPessoa.setData(LocalDate.now());

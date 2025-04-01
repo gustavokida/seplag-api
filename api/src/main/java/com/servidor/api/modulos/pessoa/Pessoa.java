@@ -37,19 +37,19 @@ public class Pessoa {
   @Column(name = "pes_pai", length = 200, nullable = false, columnDefinition = "VARCHAR(200)")
   private String pai;
 
-  @OneToMany(mappedBy = "pessoa")
+  @OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Lotacao> lotacoes;
 
-  @OneToMany(mappedBy = "pessoa")
+  @OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PessoaEndereco> pessoaEnderecos;
 
-  @OneToMany(mappedBy = "pessoa")
+  @OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ServidorEfetivo> servidoresEfetivos;
 
-  @OneToMany(mappedBy = "pessoa")
+  @OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ServidorTemporario> servidoresTemporarios;
 
-  @OneToMany(mappedBy = "pessoa")
+  @OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<FotoPessoa> fotos;
 
 }

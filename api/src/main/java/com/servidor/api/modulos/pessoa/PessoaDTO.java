@@ -6,6 +6,9 @@ import com.servidor.api.modulos.servidorefetivo.ServidorEfetivoDTO;
 import com.servidor.api.modulos.servidortemporario.ServidorTemporarioDTO;
 import jakarta.persistence.Id;
 import lombok.Data;
+import org.checkerframework.checker.formatter.qual.Format;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,7 +21,7 @@ public class PessoaDTO {
 
   private String nome;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
   private LocalDate dataNascimento;
 
   private String sexo;
@@ -34,5 +37,7 @@ public class PessoaDTO {
   private List<ServidorEfetivoDTO> servidoresEfetivos;
 
   private List<ServidorTemporarioDTO> servidoresTemporarios;
+
+  private List<MultipartFile> fotos;
 
 }

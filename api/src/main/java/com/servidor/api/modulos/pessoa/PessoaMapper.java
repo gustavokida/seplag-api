@@ -51,6 +51,9 @@ public abstract class PessoaMapper {
 
   @AfterMapping
   public void mapLotacao(PessoaDTO pessoaDTO, @MappingTarget Pessoa pessoa) {
+    if(pessoaDTO.getLotacoes() == null) {
+      return;
+    }
     List<LotacaoDTO> lotacoes = pessoaDTO.getLotacoes();
     List<Lotacao> lotacaoList = new ArrayList<>();
     for (LotacaoDTO lotacaoDTO : lotacoes) {
@@ -68,6 +71,9 @@ public abstract class PessoaMapper {
 
   @AfterMapping
   public void mapEndereco(PessoaDTO pessoaDTO, @MappingTarget Pessoa pessoa) {
+    if(pessoaDTO.getEnderecos() == null) {
+      return;
+    }
     List<Long> enderecos = pessoaDTO.getEnderecos();
     List<PessoaEndereco> enderecosList = new ArrayList<>();
     for (Long id : enderecos) {
@@ -85,6 +91,9 @@ public abstract class PessoaMapper {
 
   @AfterMapping
   public void mapServidorEfetivo(PessoaDTO pessoaDTO, @MappingTarget Pessoa pessoa) {
+    if(pessoaDTO.getServidoresEfetivos() == null) {
+      return;
+    }
     List<ServidorEfetivoDTO> servidoresEfetivos = pessoaDTO.getServidoresEfetivos();
     List<ServidorEfetivo> servidoresEfetivosList = new ArrayList<>();
     for (ServidorEfetivoDTO servidor : servidoresEfetivos) {
@@ -98,6 +107,9 @@ public abstract class PessoaMapper {
 
   @AfterMapping
   public void mapServidorTemporario(PessoaDTO pessoaDTO, @MappingTarget Pessoa pessoa) {
+    if(pessoaDTO.getServidoresTemporarios() == null) {
+      return;
+    }
     List<ServidorTemporarioDTO> servidoresTemporarios = pessoaDTO.getServidoresTemporarios();
     List<ServidorTemporario> servidoresTemporariosList = new ArrayList<>();
     for (ServidorTemporarioDTO servidor : servidoresTemporarios) {
