@@ -1,5 +1,8 @@
 package com.servidor.api.modulos.unidade;
 
+import com.servidor.api.modulos.servidorefetivo.ServidorEfetivo;
+import com.servidor.api.modulos.servidorefetivo.ServidorEfetivoRepository;
+import com.servidor.api.modulos.servidorefetivo.UnidadeServidorEfetivoDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -16,6 +20,26 @@ public class UnidadeController {
 
   @Autowired
   private UnidadeRepository unidadeRepository;
+
+  @Autowired
+  private ServidorEfetivoRepository servidorEfetivoRepository;
+
+  @Autowired
+  private UnidadeServidorEfetivoMapper unidadeServidorEfetivoMapper;
+
+  @GetMapping("{id}/servidores-efetivos-lotados")
+  public ResponseEntity<?> getServidoresEfetivosLotados(@PathVariable("id") Long id) {
+    try {
+      List<ServidorEfetivo> servidorEfetivo = servidorEfetivoRepository.findByUnidadeId(id);
+      if (servidorEfetivo.isEmpty()) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      }
+      List<UnidadeServidorEfetivoDTO> servidoresEfetivos = unidadeServidorEfetivoMapper.toDTO(servidorEfetivo, id);
+      return new ResponseEntity<>(servidoresEfetivos, HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
   @GetMapping
   public ResponseEntity<Page<Unidade>> getAllUnidades(Pageable pageable) {

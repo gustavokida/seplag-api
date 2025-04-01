@@ -31,7 +31,7 @@ public class MinioServiceImpl implements MinioService {
         );
       }
     } catch (Exception e) {
-      throw new RuntimeException("Failed to initialize MinIO bucket", e);
+      throw new RuntimeException("Falha ao iniciar minio bucket", e);
     }
   }
 

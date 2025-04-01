@@ -35,27 +35,6 @@ public class FotoPessoaController {
   @Autowired
   private final MinioService minioService;
 
-  @GetMapping
-  public ResponseEntity<Page<FotoPessoa>> getAllFotoPessoas(Pageable pageable) {
-    try {
-      Page<FotoPessoa> fotoPessoas = fotoPessoaRepository.findAll(pageable);
-      if (fotoPessoas.isEmpty()) {
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-      }
-      return new ResponseEntity<>(fotoPessoas, HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  @GetMapping("/{id}")
-  public ResponseEntity<FotoPessoa> getFotoPessoaById(@PathVariable("id") Long id) {
-    Optional<FotoPessoa> fotoPessoaData = fotoPessoaRepository.findById(id);
-
-    return fotoPessoaData.map(fotoPessoa -> new ResponseEntity<>(fotoPessoa, HttpStatus.OK))
-            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-  }
-
   @GetMapping("/{id}/url")
   public ResponseEntity<String> getFotoPessoaUrl(@PathVariable("id") Long id) {
     Optional<FotoPessoa> fotoPessoaData = fotoPessoaRepository.findById(id);
@@ -84,6 +63,27 @@ public class FotoPessoaController {
     } catch (Exception e) {
       return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @GetMapping
+  public ResponseEntity<Page<FotoPessoa>> getAllFotoPessoas(Pageable pageable) {
+    try {
+      Page<FotoPessoa> fotoPessoas = fotoPessoaRepository.findAll(pageable);
+      if (fotoPessoas.isEmpty()) {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      }
+      return new ResponseEntity<>(fotoPessoas, HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<FotoPessoa> getFotoPessoaById(@PathVariable("id") Long id) {
+    Optional<FotoPessoa> fotoPessoaData = fotoPessoaRepository.findById(id);
+
+    return fotoPessoaData.map(fotoPessoa -> new ResponseEntity<>(fotoPessoa, HttpStatus.OK))
+            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   @Transactional
