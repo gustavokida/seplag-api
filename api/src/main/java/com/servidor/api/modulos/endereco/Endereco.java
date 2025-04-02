@@ -1,5 +1,8 @@
 package com.servidor.api.modulos.endereco;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.servidor.api.modulos.cidade.Cidade;
 import com.servidor.api.modulos.pessoaendereco.PessoaEndereco;
 import com.servidor.api.modulos.unidadeendereco.UnidadeEndereco;
@@ -32,6 +35,8 @@ public class Endereco {
 
   @ManyToOne
   @JoinColumn(name = "cid_id", foreignKey = @ForeignKey(name = "fk_cidade_endereco"))
+  @JsonIdentityReference(alwaysAsId = true)
+  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
   private Cidade cidade;
 
   @OneToMany(mappedBy = "endereco")
@@ -39,7 +44,5 @@ public class Endereco {
 
   @OneToMany(mappedBy = "endereco")
   private List<PessoaEndereco> pessoaEnderecos;
-
-
 
 }

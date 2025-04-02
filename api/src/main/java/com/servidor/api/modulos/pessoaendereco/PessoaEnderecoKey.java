@@ -2,9 +2,11 @@ package com.servidor.api.modulos.pessoaendereco;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
 @Embeddable
 public class PessoaEnderecoKey implements Serializable {
 

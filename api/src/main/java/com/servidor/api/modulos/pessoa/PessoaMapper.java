@@ -1,9 +1,11 @@
 package com.servidor.api.modulos.pessoa;
 
+import com.servidor.api.modulos.endereco.Endereco;
 import com.servidor.api.modulos.endereco.EnderecoRepository;
 import com.servidor.api.modulos.lotacao.Lotacao;
-import com.servidor.api.modulos.lotacao.LotacaoDTO;
+
 import com.servidor.api.modulos.pessoaendereco.PessoaEndereco;
+import com.servidor.api.modulos.pessoaendereco.PessoaEnderecoKey;
 import com.servidor.api.modulos.servidorefetivo.ServidorEfetivo;
 import com.servidor.api.modulos.servidorefetivo.ServidorEfetivoDTO;
 import com.servidor.api.modulos.servidortemporario.ServidorTemporario;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public abstract class PessoaMapper {
@@ -29,6 +32,10 @@ public abstract class PessoaMapper {
   @Autowired
   EnderecoRepository enderecoRepository;
 
+  @Autowired
+  PessoaRepository pessoaRepository;
+
+  @Mapping(target = "id", ignore = true)
   @Mapping(target = "fotos", ignore = true)
   @Mapping(target = "lotacoes", ignore = true)
   @Mapping(target = "servidoresEfetivos", ignore = true)
@@ -36,7 +43,7 @@ public abstract class PessoaMapper {
   @Mapping(target = "pessoaEnderecos", ignore = true)
   public abstract Pessoa toEntity(PessoaDTO pessoaDTO);
 
-  @Mapping(target = "id", source = "id")
+  @Mapping(target = "id", ignore = true)
   @Mapping(target = "nome", source = "nome")
   @Mapping(target = "dataNascimento", source = "dataNascimento")
   @Mapping(target = "sexo", source = "sexo")
@@ -54,9 +61,9 @@ public abstract class PessoaMapper {
     if(pessoaDTO.getLotacoes() == null) {
       return;
     }
-    List<LotacaoDTO> lotacoes = pessoaDTO.getLotacoes();
+    List<PessoaDTO.Lotacoes> lotacoes = pessoaDTO.getLotacoes();
     List<Lotacao> lotacaoList = new ArrayList<>();
-    for (LotacaoDTO lotacaoDTO : lotacoes) {
+    for (PessoaDTO.Lotacoes lotacaoDTO : lotacoes) {
       Unidade unidade = unidadeRepository.findById(lotacaoDTO.getUnidadeId()).orElse(null);
       Lotacao lotacao = new Lotacao();
       lotacao.setPessoa(pessoa);
@@ -74,16 +81,20 @@ public abstract class PessoaMapper {
     if(pessoaDTO.getEnderecos() == null) {
       return;
     }
+    pessoa = pessoaRepository.save(pessoa);
     List<Long> enderecos = pessoaDTO.getEnderecos();
     List<PessoaEndereco> enderecosList = new ArrayList<>();
     for (Long id : enderecos) {
       if (id != null) {
-        enderecoRepository.findById(id).ifPresent(endereco -> {
-          PessoaEndereco pessoaEndereco = new PessoaEndereco();
-          pessoaEndereco.setPessoa(pessoa);
-          pessoaEndereco.setEndereco(endereco);
-          enderecosList.add(pessoaEndereco);
-        });
+        Optional<Endereco> endereco = enderecoRepository.findById(id);
+        PessoaEnderecoKey pessoaEnderecoKey = new PessoaEnderecoKey();
+        pessoaEnderecoKey.setEnderecoId(endereco.get().getId());
+        pessoaEnderecoKey.setPessoaId(pessoa.getId());
+        PessoaEndereco pessoaEndereco = new PessoaEndereco();
+        pessoaEndereco.setPessoa(pessoa);
+        pessoaEndereco.setEndereco(endereco.get());
+        pessoaEndereco.setId(pessoaEnderecoKey);
+        enderecosList.add(pessoaEndereco);
       }
     }
     pessoa.setPessoaEnderecos(enderecosList);
@@ -94,12 +105,14 @@ public abstract class PessoaMapper {
     if(pessoaDTO.getServidoresEfetivos() == null) {
       return;
     }
+    pessoa = pessoaRepository.save(pessoa);
     List<ServidorEfetivoDTO> servidoresEfetivos = pessoaDTO.getServidoresEfetivos();
     List<ServidorEfetivo> servidoresEfetivosList = new ArrayList<>();
     for (ServidorEfetivoDTO servidor : servidoresEfetivos) {
       ServidorEfetivo servidorEfetivo = new ServidorEfetivo();
       servidorEfetivo.setPessoa(pessoa);
       servidorEfetivo.setMatricula(servidor.getMatricula());
+      servidorEfetivo.setPessoaId(pessoa.getId());
       servidoresEfetivosList.add(servidorEfetivo);
     }
     pessoa.setServidoresEfetivos(servidoresEfetivosList);
@@ -110,6 +123,7 @@ public abstract class PessoaMapper {
     if(pessoaDTO.getServidoresTemporarios() == null) {
       return;
     }
+    pessoa = pessoaRepository.save(pessoa);
     List<ServidorTemporarioDTO> servidoresTemporarios = pessoaDTO.getServidoresTemporarios();
     List<ServidorTemporario> servidoresTemporariosList = new ArrayList<>();
     for (ServidorTemporarioDTO servidor : servidoresTemporarios) {
@@ -117,6 +131,7 @@ public abstract class PessoaMapper {
       servidorTemporario.setPessoa(pessoa);
       servidorTemporario.setDataAdmissao(servidor.getDataAdmissao());
       servidorTemporario.setDataDemissao(servidor.getDataDemissao());
+      servidorTemporario.setPessoaId(pessoa.getId());
       servidoresTemporariosList.add(servidorTemporario);
     }
     pessoa.setServidoresTemporarios(servidoresTemporariosList);

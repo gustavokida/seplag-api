@@ -1,5 +1,7 @@
 package com.servidor.api.modulos.endereco;
 
+import com.servidor.api.modulos.cidade.Cidade;
+import com.servidor.api.modulos.cidade.CidadeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,9 @@ public class EnderecoController {
 
   @Autowired
   private EnderecoRepository enderecoRepository;
+
+  @Autowired
+  private CidadeRepository cidadeRepository;
 
   @GetMapping
   public ResponseEntity<Page<Endereco>> getAllEnderecos(Pageable pageable) {
@@ -42,6 +47,8 @@ public class EnderecoController {
   @PostMapping
   public ResponseEntity<Endereco> createEndereco(@RequestBody Endereco endereco) {
     try {
+      Optional<Cidade> cidade = cidadeRepository.findById(Long.valueOf(endereco.getCidade().getId()));
+      endereco.setCidade(cidade.get());
       Endereco _endereco = enderecoRepository.save(endereco);
       return new ResponseEntity<>(_endereco, HttpStatus.CREATED);
     } catch (Exception e) {

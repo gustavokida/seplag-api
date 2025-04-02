@@ -1,16 +1,16 @@
 package com.servidor.api.modulos.servidorefetivo;
 
 import com.servidor.api.modulos.endereco.Endereco;
+import com.servidor.api.modulos.lotacao.Lotacao;
+import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/servidor-efetivo")
@@ -19,13 +19,16 @@ public class ServidorEfetivoController {
   @Autowired
   private ServidorEfetivoRepository servidorEfetivoRepository;
 
+  @Autowired
 
-  @GetMapping("buscar-endereco-funcional")
-  public ResponseEntity<?> buscarEnderecoFuncional(@RequestParam String nomeParcial) {
+
+  @GetMapping("/buscar-endereco-funcional/{nomeParcial}")
+  public ResponseEntity<?> buscarEnderecoFuncional(@RequestParam(name = "nomeParcial") String nomeParcial) {
     try {
-      ServidorEfetivo servidorEfetivo = servidorEfetivoRepository.findByPessoa_NomeLike(nomeParcial);
+      List<ServidorEfetivo> servidorEfetivo = servidorEfetivoRepository.findPessoaNomesBySubstring(nomeParcial);
       if (servidorEfetivo != null) {
-        Endereco endereco = servidorEfetivo.getPessoa().getPessoaEnderecos().getFirst().getEndereco();
+        List<Lotacao> lotacaoList = servidorEfetivo.getFirst().getPessoa().getLotacoes();
+        Endereco endereco = lotacaoList.getFirst().getUnidade().getUnidadeEnderecos().getFirst().getEndereco();
         return new ResponseEntity<>(endereco, HttpStatus.OK);
       } else {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

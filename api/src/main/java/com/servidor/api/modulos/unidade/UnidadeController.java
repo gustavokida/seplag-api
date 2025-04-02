@@ -1,8 +1,12 @@
 package com.servidor.api.modulos.unidade;
 
+import com.servidor.api.modulos.endereco.Endereco;
+import com.servidor.api.modulos.endereco.EnderecoRepository;
 import com.servidor.api.modulos.servidorefetivo.ServidorEfetivo;
 import com.servidor.api.modulos.servidorefetivo.ServidorEfetivoRepository;
 import com.servidor.api.modulos.servidorefetivo.UnidadeServidorEfetivoDTO;
+import com.servidor.api.modulos.unidadeendereco.UnidadeEndereco;
+import com.servidor.api.modulos.unidadeendereco.UnidadeEnderecoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +27,13 @@ public class UnidadeController {
   private UnidadeRepository unidadeRepository;
 
   @Autowired
+  private UnidadeEnderecoRepository unidadeEnderecoRepository;
+
+  @Autowired
   private ServidorEfetivoRepository servidorEfetivoRepository;
+
+  @Autowired
+  private EnderecoRepository enderecoRepository;
 
   @Autowired
   private UnidadeServidorEfetivoMapper unidadeServidorEfetivoMapper;
@@ -66,8 +77,25 @@ public class UnidadeController {
   @PostMapping
   public ResponseEntity<Unidade> createUnidade(@RequestBody Unidade unidade) {
     try {
-      Unidade _unidade = unidadeRepository.save(unidade);
-      return new ResponseEntity<>(_unidade, HttpStatus.CREATED);
+      List<UnidadeEndereco> unidadeEnderecoList = new ArrayList<>();
+      if(unidade.getUnidadeEnderecos() != null &&!unidade.getUnidadeEnderecos().isEmpty()){
+        UnidadeEndereco unidadeEndereco1 = null;
+        Optional<Endereco> endereco = null;
+        List<UnidadeEndereco> unidadeEnderecoListAux = unidade.getUnidadeEnderecos();
+        unidade.setUnidadeEnderecos(null);
+        unidadeRepository.save(unidade);
+        for(UnidadeEndereco unidadeEndereco: unidadeEnderecoListAux){
+          unidadeEndereco1 = new UnidadeEndereco();
+          unidadeEndereco1.setUnidade(unidade);
+          unidadeEndereco1.setUnidadeId(unidade.getId());
+          endereco = enderecoRepository.findById(Long.valueOf(unidadeEndereco.getEndereco().getId()));
+          unidadeEndereco1.setEndereco(endereco.get());
+          unidadeEnderecoList.add(unidadeEndereco1);
+        }
+        unidadeEnderecoRepository.saveAll(unidadeEnderecoList);
+      }
+      unidade.setUnidadeEnderecos(unidadeEnderecoList);
+      return new ResponseEntity<>(unidade, HttpStatus.CREATED);
     } catch (Exception e) {
       return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -82,6 +110,19 @@ public class UnidadeController {
       Unidade _unidade = unidadeData.get();
       _unidade.setNome(unidade.getNome());
       _unidade.setSigla(unidade.getSigla());
+      if(!unidade.getUnidadeEnderecos().isEmpty()){
+        List<UnidadeEndereco> unidadeEnderecoList= new ArrayList<>();
+        UnidadeEndereco unidadeEndereco1 = null;
+        Optional<Endereco> endereco = null;
+        for(UnidadeEndereco unidadeEndereco: unidade.getUnidadeEnderecos()){
+          unidadeEndereco1 = new UnidadeEndereco();
+          unidadeEndereco1.setUnidade(unidade);
+          endereco = enderecoRepository.findById(Long.valueOf(unidadeEndereco.getEndereco().getId()));
+          unidadeEndereco1.setEndereco(endereco.get());
+          unidadeEnderecoList.add(unidadeEndereco1);
+        }
+        unidade.setUnidadeEnderecos(unidadeEnderecoList);
+      }
       return new ResponseEntity<>(unidadeRepository.save(_unidade), HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);

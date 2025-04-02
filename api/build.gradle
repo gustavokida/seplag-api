@@ -42,6 +42,7 @@ dependencies {
 	implementation "io.minio:minio:8.5.17"
 	implementation 'org.mapstruct:mapstruct:1.5.2.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.2.Final'
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5"
 }
 
 tasks.named('test') {

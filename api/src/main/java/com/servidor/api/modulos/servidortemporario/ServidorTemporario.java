@@ -1,5 +1,8 @@
 package com.servidor.api.modulos.servidortemporario;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.servidor.api.modulos.pessoa.Pessoa;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,6 +21,8 @@ public class ServidorTemporario {
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("pessoaId")
   @JoinColumn(name = "pes_id", foreignKey = @ForeignKey(name = "fk_servidor_temporario_pessoa"))
+  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+  @JsonIdentityReference(alwaysAsId = true)
   private Pessoa pessoa;
 
   @Temporal(TemporalType.DATE)

@@ -5,7 +5,5 @@ import lombok.Data;
 @Data
 public class ServidorEfetivoDTO {
 
-  private Long id;
-
   private String matricula;
 }

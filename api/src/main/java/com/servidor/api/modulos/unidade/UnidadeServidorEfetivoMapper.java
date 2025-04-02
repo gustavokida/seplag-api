@@ -2,12 +2,10 @@ package com.servidor.api.modulos.unidade;
 
 import com.servidor.api.modulos.fotopessoa.FotoPessoa;
 import com.servidor.api.modulos.fotopessoa.FotoPessoaRepository;
-import com.servidor.api.modulos.lotacao.Lotacao;
-import com.servidor.api.modulos.minio.MinioService;
+import com.servidor.api.minio.MinioService;
 import com.servidor.api.modulos.servidorefetivo.ServidorEfetivo;
 import com.servidor.api.modulos.servidorefetivo.UnidadeServidorEfetivoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -45,6 +43,7 @@ public class UnidadeServidorEfetivoMapper {
         return url;
       }).toList();
       dto.setUrl(fotoPessoasUrl);
+      dtos.add(dto);
     }
     return dtos;
   }

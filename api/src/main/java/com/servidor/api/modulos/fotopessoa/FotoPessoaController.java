@@ -1,16 +1,20 @@
 package com.servidor.api.modulos.fotopessoa;
 
-import com.servidor.api.modulos.minio.MinioService;
-import com.servidor.api.modulos.minio.MinioServiceImpl;
+import com.servidor.api.minio.MinioService;
 import com.servidor.api.modulos.pessoa.Pessoa;
 import com.servidor.api.modulos.pessoa.PessoaRepository;
 import io.minio.ObjectWriteResponse;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -87,8 +91,9 @@ public class FotoPessoaController {
   }
 
   @Transactional
-  @PostMapping("pessoa/{id}")
-  public ResponseEntity<List<FotoPessoa>> createFotoPessoa(@PathVariable("id") Long id, @RequestParam("fotos") MultipartFile[] fotos) {
+  @PostMapping(value = "pessoa/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<?> createFotoPessoa(@PathVariable("id") Long id,
+    @RequestParam("fotos") List<MultipartFile> fotos) {
     try {
       Pessoa pessoa = pessoaRepository.findById(id).orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
       List<FotoPessoa> fotoPessoaList = new ArrayList<>();
@@ -107,7 +112,7 @@ public class FotoPessoaController {
       }
       return new ResponseEntity<>(fotoPessoaList, HttpStatus.CREATED);
     } catch (Exception e) {
-      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

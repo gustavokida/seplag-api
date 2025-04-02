@@ -1,4 +1,4 @@
-package com.servidor.api.modulos.minio;
+package com.servidor.api.minio;
 
 import io.minio.*;
 import io.minio.http.Method;

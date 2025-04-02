@@ -1,7 +1,7 @@
 package com.servidor.api.modulos.pessoa;
 
 import com.servidor.api.modulos.fotopessoa.FotoPessoa;
-import com.servidor.api.modulos.minio.MinioService;
+import com.servidor.api.minio.MinioService;
 import io.minio.ObjectWriteResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,27 +33,10 @@ public class PessoaController {
   private PessoaMapper pessoaMapper;
 
   @Transactional
-  @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-  public ResponseEntity<?> createPessoa(@ModelAttribute PessoaDTO pessoaDTO) {
+  @PostMapping
+  public ResponseEntity<?> createPessoa(@RequestBody PessoaDTO pessoaDTO) {
     try {
       Pessoa pessoa = pessoaMapper.toEntity(pessoaDTO);
-      List<FotoPessoa> fotos = new ArrayList<>();
-      pessoa.setFotos(new ArrayList<>());
-      if(pessoaDTO.getFotos() != null){
-        for (MultipartFile foto : pessoaDTO.getFotos()) {
-          if (!foto.isEmpty()) {
-            String hash = UUID.randomUUID().toString();
-            ObjectWriteResponse minioResponse = minioService.uploadFile(foto, hash);
-            FotoPessoa fotoPessoa = new FotoPessoa();
-            fotoPessoa.setPessoa(pessoa);
-            fotoPessoa.setData(LocalDate.now());
-            fotoPessoa.setBucket(minioResponse.bucket());
-            fotoPessoa.setHash(hash);
-            fotos.add(fotoPessoa);
-          }
-        }
-        pessoa.setFotos(fotos);
-      }
       Pessoa savedPessoa = pessoaRepository.save(pessoa);
       return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
     } catch (Exception e) {

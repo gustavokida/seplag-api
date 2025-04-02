@@ -1,5 +1,8 @@
 package com.servidor.api.modulos.lotacao;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.servidor.api.modulos.pessoa.Pessoa;
 import com.servidor.api.modulos.unidade.Unidade;
 import jakarta.persistence.*;
@@ -19,10 +22,14 @@ public class Lotacao {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "pes_id", foreignKey = @ForeignKey(name = "fk_pessoa_lotacao"))
+  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+  @JsonIdentityReference(alwaysAsId = true)
   private Pessoa pessoa;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "unid_id", foreignKey = @ForeignKey(name = "fk_unidade_lotacao"))
+  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+  @JsonIdentityReference(alwaysAsId = true)
   private Unidade unidade;
 
   @Temporal(TemporalType.DATE)
