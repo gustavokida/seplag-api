@@ -2,7 +2,6 @@ package com.servidor.api.modulos.servidorefetivo;
 
 import com.servidor.api.modulos.endereco.Endereco;
 import com.servidor.api.modulos.lotacao.Lotacao;
-import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,17 +18,17 @@ public class ServidorEfetivoController {
   @Autowired
   private ServidorEfetivoRepository servidorEfetivoRepository;
 
-  @Autowired
-
-
-  @GetMapping("/buscar-endereco-funcional/{nomeParcial}")
+  @GetMapping("/buscar-endereco-funcional")
   public ResponseEntity<?> buscarEnderecoFuncional(@RequestParam(name = "nomeParcial") String nomeParcial) {
     try {
       List<ServidorEfetivo> servidorEfetivo = servidorEfetivoRepository.findPessoaNomesBySubstring(nomeParcial);
       if (servidorEfetivo != null) {
         List<Lotacao> lotacaoList = servidorEfetivo.getFirst().getPessoa().getLotacoes();
         Endereco endereco = lotacaoList.getFirst().getUnidade().getUnidadeEnderecos().getFirst().getEndereco();
-        return new ResponseEntity<>(endereco, HttpStatus.OK);
+        Map<String, String> response = new HashMap<String, String>();
+        response.put("endereco", endereco.getTipoLogradouro() + " " +  endereco.getLogradouro() + ", " +
+                endereco.getNumero() + ", " + endereco.getBairro() + ", " + endereco.getCidade().getNome());
+        return new ResponseEntity<>(response, HttpStatus.OK);
       } else {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       }
