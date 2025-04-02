@@ -123,9 +123,9 @@ docker build -t seplag-api:latest .
 
 
 ### Consulta de endereço funcional de servidor efetivo
+  - no "servidor-efetivo-controller" endpoint "/api/servidor-efetivo/buscar-endereco-funcional", insira uma parte do nome e faça a requisição.
   
-  - 
 
 
-# Consulta foto pessoa por URL Min.io
-  - 
+### Consulta foto pessoa por URL Min.io
+  - Coloque o id da entidade fotoPessoa que armazena o hash da foto no "foto-pessoa-controller" endpoint "/api/foto-pessoa/{id}/url", ele irá retornar a URL da foto no Min.io.
